@@ -132,6 +132,7 @@ body {
 
         >output {
             flex-grow: 1;
+            height: 100%;
             border: 1px dotted var(--color-border);
             border-radius: 4px;
         }
@@ -148,9 +149,18 @@ body {
 #log {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
     gap: 8px;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-gutter: stable;
+    scrollbar-color: var(--color-border) #0000;
+
+    &::before {
+        content: '';
+        display: block;
+        margin-top: auto;
+    }
 }
 
 .table-controll {

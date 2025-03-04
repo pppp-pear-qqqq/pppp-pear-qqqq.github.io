@@ -12,7 +12,6 @@ const temp_pc = document.querySelector('main>template').content.querySelector('.
 const temp_npc = document.querySelector('main>template').content.querySelector('.unit.simple');
 const temp_weapon = document.querySelector('main>template').content.querySelector('.weapon');
 const dialog = document.querySelector('dialog#unit');
-const log = document.querySelector('#log');
 const areas = document.querySelectorAll('main>.area');
 let selected_unit;
 let message = [];
@@ -350,9 +349,6 @@ function rate(rate, crit) {
             break;
     }
     return [dmg.reduce((sum, v) => sum + v, 0), dmg.join(','), roll_log.join(' '), dmg.length - 1];
-}
-function push_log(text) {
-    log.innerHTML += `<div>${text !== null && text !== void 0 ? text : ''}</div>`;
 }
 function add_unit() {
     selected_unit = null;

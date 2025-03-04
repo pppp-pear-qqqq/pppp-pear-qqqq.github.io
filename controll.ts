@@ -1,3 +1,5 @@
+const log = document.querySelector<HTMLOutputElement>('#log')!;
+
 function add_column(table: HTMLTableElement, class_name?: string, body_index?: number) {
 	const body = table.tBodies[body_index ?? 0];
 	const temp = body.querySelector('template')!.content;
@@ -7,6 +9,10 @@ function add_column(table: HTMLTableElement, class_name?: string, body_index?: n
 }
 function remove_column(table: HTMLTableElement, body_index?: number) {
 	table.tBodies[body_index ?? 0].deleteRow(-1);
+}
+function push_log(text: string) {
+	log.innerHTML += `<div>${text !== null && text !== void 0 ? text : ''}</div>`;
+	log.scroll(0, log.scrollHeight);
 }
 
 {

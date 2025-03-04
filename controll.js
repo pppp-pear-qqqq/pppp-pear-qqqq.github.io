@@ -1,4 +1,5 @@
 "use strict";
+const log = document.querySelector('#log');
 function add_column(table, class_name, body_index) {
     const body = table.tBodies[body_index !== null && body_index !== void 0 ? body_index : 0];
     const temp = body.querySelector('template').content;
@@ -8,6 +9,10 @@ function add_column(table, class_name, body_index) {
 }
 function remove_column(table, body_index) {
     table.tBodies[body_index !== null && body_index !== void 0 ? body_index : 0].deleteRow(-1);
+}
+function push_log(text) {
+    log.innerHTML += `<div>${text !== null && text !== void 0 ? text : ''}</div>`;
+    log.scroll(0, log.scrollHeight);
 }
 {
     const log = document.querySelector('[name="log"]');

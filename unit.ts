@@ -2,7 +2,6 @@ const temp_pc = document.querySelector<HTMLTemplateElement>('main>template')!.co
 const temp_npc = document.querySelector<HTMLTemplateElement>('main>template')!.content.querySelector('.unit.simple')!;
 const temp_weapon = document.querySelector<HTMLTemplateElement>('main>template')!.content.querySelector('.weapon')!;
 const dialog = document.querySelector<HTMLDialogElement>('dialog#unit')!;
-const log = document.querySelector<HTMLOutputElement>('#log')!;
 const areas = document.querySelectorAll<HTMLElement>('main>.area');
 
 let selected_unit: HTMLElement | null;
@@ -379,9 +378,6 @@ function rate(rate: number, crit: number): [number, string, string, number] {
 		if (dice < crit) break;
 	}
 	return [dmg.reduce((sum, v) => sum + v, 0), dmg.join(','), roll_log.join(' '), dmg.length - 1]
-}
-function push_log(text?: string) {
-	log.innerHTML += `<div>${text ?? ''}</div>`;
 }
 
 function add_unit() {
