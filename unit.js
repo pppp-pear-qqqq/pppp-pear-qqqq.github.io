@@ -251,29 +251,54 @@ function unit_controll(target) {
         }
     }
 }
+var Res;
+(function (Res) {
+    Res[Res["Fumble"] = 0] = "Fumble";
+    Res[Res["Normal"] = 1] = "Normal";
+    Res[Res["Critical"] = 2] = "Critical";
+})(Res || (Res = {}));
+function check_res(dice) {
+    if (dice === 2)
+        return Res.Fumble;
+    else if (dice === 12)
+        return Res.Critical;
+    else if (dice < 2 || dice > 12)
+        throw new Error('ダイスの出目が範囲外です');
+    else
+        return Res.Normal;
+}
 function battle(atker, target) {
     var _a;
-    const [acc, acc_text] = (() => {
+    const [acc, acc_text, acc_res] = (() => {
         if (atker instanceof NPC) {
-            return [atker.acc, atker.acc.toString()];
+            return [atker.acc, atker.acc.toString(), Res.Normal];
         }
         else {
-            console.log(atker, target);
             const weapon = atker.weapon[atker.weapon_idx];
             const [dice, dice_text] = roll();
-            return [dice + weapon.acc, `([${dice_text}]->${dice}+${weapon.acc})`];
+            const res = check_res(dice);
+            switch (res) {
+                case Res.Fumble: return [dice + weapon.acc, `([${dice_text}]->Fumble)`, res];
+                case Res.Normal: return [dice + weapon.acc, `([${dice_text}]->${dice}+${weapon.acc})`, res];
+                case Res.Critical: return [dice + weapon.acc + 5, `([${dice_text}]->${dice}+${weapon.acc}+Crit)`, res];
+            }
         }
     })();
-    const [eva, eva_text] = (() => {
+    const [eva, eva_text, eva_res] = (() => {
         if (target instanceof NPC) {
-            return [target.eva, target.eva.toString()];
+            return [target.eva, target.eva.toString(), Res.Normal];
         }
         else {
             const [dice, dice_text] = roll();
-            return [dice + target.eva, `([${dice_text}]->${dice}+${target.eva})`];
+            const res = check_res(dice);
+            switch (res) {
+                case Res.Fumble: return [dice + target.eva, `([${dice_text}]->Fumble)`, res];
+                case Res.Normal: return [dice + target.eva, `([${dice_text}]->${dice}+${target.eva})`, res];
+                case Res.Critical: return [dice + target.eva + 5, `([${dice_text}]->${dice}+${target.eva}+Crit)`, res];
+            }
         }
     })();
-    if (acc > eva) {
+    if ((acc_res === Res.Critical && eva_res !== Res.Critical) || (eva_res !== Res.Critical && acc > eva)) {
         let [dmg, dmg_text] = (() => {
             if (atker instanceof NPC) {
                 const [dice, dice_text] = roll();
@@ -314,51 +339,6 @@ function roll(dice = 2) {
     return [result.reduce((sum, v) => sum + v), `${result.join(',')}`];
 }
 function rate(rate, crit) {
-    const rate_map = [
-        [0, 0, 0, 1, 2, 2, 3, 3, 4, 4], // 0
-        [0, 0, 0, 1, 2, 3, 3, 3, 4, 4], // 1
-        [0, 0, 0, 1, 2, 3, 4, 4, 4, 4], // 2
-        [0, 0, 1, 1, 2, 3, 4, 4, 4, 5], // 3
-        [0, 0, 1, 2, 2, 3, 4, 4, 5, 5], // 4
-        [0, 1, 1, 2, 2, 3, 4, 5, 5, 5], // 5
-        [0, 1, 1, 2, 3, 3, 4, 5, 5, 5], // 6
-        [0, 1, 1, 2, 3, 4, 4, 5, 5, 6], // 7
-        [0, 1, 2, 2, 3, 4, 4, 5, 6, 6], // 8
-        [0, 1, 2, 3, 3, 4, 4, 5, 6, 7], // 9
-        [1, 1, 2, 3, 3, 4, 5, 5, 6, 7], // 10
-        [1, 2, 3, 3, 3, 4, 5, 6, 6, 7], // 11
-        [1, 2, 3, 3, 4, 4, 5, 6, 6, 7], // 12
-        [1, 2, 3, 3, 4, 4, 5, 6, 7, 7], // 13
-        [1, 2, 3, 4, 4, 4, 5, 6, 7, 8], // 14
-        [1, 2, 3, 4, 4, 5, 5, 6, 7, 8], // 15
-        [1, 2, 3, 4, 4, 5, 6, 7, 7, 8], // 16
-        [1, 2, 3, 4, 5, 5, 6, 7, 7, 8], // 17
-        [1, 2, 3, 4, 5, 6, 6, 7, 7, 8], // 18
-        [1, 2, 3, 4, 5, 6, 7, 7, 8, 9], // 19
-        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], // 20
-        [1, 2, 3, 4, 6, 6, 7, 8, 9, 10], // 21
-        [1, 2, 3, 5, 6, 6, 7, 8, 9, 10], // 22
-        [2, 2, 3, 5, 6, 7, 7, 8, 9, 10], // 23
-        [2, 3, 4, 5, 6, 7, 7, 8, 9, 10], // 24
-        [2, 3, 4, 5, 6, 7, 8, 8, 9, 10], // 25
-        [2, 3, 4, 5, 6, 8, 8, 9, 9, 10], // 26
-        [2, 3, 4, 6, 6, 8, 8, 9, 9, 10], // 27
-        [2, 3, 4, 6, 6, 8, 9, 9, 10, 10], // 28
-        [2, 3, 4, 6, 7, 8, 9, 9, 10, 10], // 29
-        [2, 4, 4, 6, 7, 8, 9, 10, 10, 10], // 30
-    ];
-    /*
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],	// 1
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],	// 2
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],	// 3
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],	// 4
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],	// 5
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],	// 6
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],	// 7
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],	// 8
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],	// 9
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],	// 0
-    */
     let dmg = [];
     let roll_log = [];
     for (let i = 0; i < 100; ++i) {
@@ -431,7 +411,7 @@ document.body.addEventListener('keydown', ev => {
 });
 function load_clipboard() {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b;
+        var _a, _b, _c, _d, _e;
         try {
             // @ts-ignore
             const permission = yield navigator.permissions.query({ name: 'clipboard-read' });
@@ -444,7 +424,7 @@ function load_clipboard() {
             const weapon_num = Number(data.weaponNum);
             let weapon = [];
             for (let i = 1; i <= weapon_num; ++i) {
-                weapon.push(new Weapon((_a = data[`weapon${i}Name`]) !== null && _a !== void 0 ? _a : '', Number(data[`weapon${i}AccTotal`]), Number(data[`weapon${i}Rate`]), Number((_b = data[`weapon${i}Crit`]) !== null && _b !== void 0 ? _b : 10), Number(data[`weapon${i}DmgTotal`])));
+                weapon.push(new Weapon((_a = data[`weapon${i}Name`]) !== null && _a !== void 0 ? _a : '', Number((_b = data[`weapon${i}AccTotal`]) !== null && _b !== void 0 ? _b : 0), Number((_c = data[`weapon${i}Rate`]) !== null && _c !== void 0 ? _c : 0), Number((_d = data[`weapon${i}Crit`]) !== null && _d !== void 0 ? _d : 10), Number((_e = data[`weapon${i}DmgTotal`]) !== null && _e !== void 0 ? _e : 0)));
             }
             const pc = new PC(data.characterName, { now: Number(data.hpTotal), max: Number(data.hpTotal) }, { now: Number(data.mpTotal), max: Number(data.mpTotal) }, Number(data.defenseTotal1Eva), Number(data.defenseTotal1Def), weapon);
             areas.item(1).appendChild(pc.elem);

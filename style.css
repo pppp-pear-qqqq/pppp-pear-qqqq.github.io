@@ -12,6 +12,7 @@ ol {
 input,
 textarea {
     background: none;
+    color: var(--color-text);
 }
 
 a[href] {
@@ -148,6 +149,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
+    gap: 8px;
     overflow: hidden;
 }
 
