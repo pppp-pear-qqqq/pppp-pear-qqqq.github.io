@@ -68,32 +68,37 @@ class PC {
         return elem;
     }
     click(ev) {
-        const e = ev.currentTarget;
-        selected_unit = e;
-        dialog.dataset.type = 'pc';
-        const set = (key) => dialog.querySelector(`[name="${key}"]`).value = e.querySelector(`.${key}`).innerText;
-        set('name');
-        set('hp-now');
-        set('hp-max');
-        set('mp-now');
-        set('mp-max');
-        set('eva');
-        set('def');
-        const table = dialog.querySelector('.pc>table>tbody');
-        while (table.rows.length > 0)
-            table.deleteRow(0);
-        const temp_row = table.querySelector('template').content.firstElementChild;
-        e.querySelectorAll('.weapon').forEach(e => {
-            const row = temp_row.cloneNode(true);
-            const set = (key) => row.querySelector(`[name="${key}"]`).value = e.querySelector(`.${key}`).innerText;
+        if (ev.ctrlKey) {
+            const e = ev.currentTarget;
+            selected_unit = e;
+            dialog.dataset.type = 'pc';
+            const set = (key) => dialog.querySelector(`[name="${key}"]`).value = e.querySelector(`.${key}`).innerText;
             set('name');
-            set('acc');
-            set('rate');
-            set('crit');
-            set('dmg');
-            table.insertRow().replaceWith(row);
-        });
-        dialog.showModal();
+            set('hp-now');
+            set('hp-max');
+            set('mp-now');
+            set('mp-max');
+            set('eva');
+            set('def');
+            const table = dialog.querySelector('.pc>table>tbody');
+            while (table.rows.length > 0)
+                table.deleteRow(0);
+            const temp_row = table.querySelector('template').content.firstElementChild;
+            e.querySelectorAll('.weapon').forEach(e => {
+                const row = temp_row.cloneNode(true);
+                const set = (key) => row.querySelector(`[name="${key}"]`).value = e.querySelector(`.${key}`).innerText;
+                set('name');
+                set('acc');
+                set('rate');
+                set('crit');
+                set('dmg');
+                table.insertRow().replaceWith(row);
+            });
+            dialog.showModal();
+        }
+        else {
+            unit_controll(ev.target);
+        }
     }
     dragstart(ev) {
         selected_unit = ev.currentTarget;
@@ -169,21 +174,26 @@ class NPC {
         return elem;
     }
     click(ev) {
-        const e = ev.currentTarget;
-        selected_unit = e;
-        dialog.dataset.type = 'npc';
-        const set = (key) => dialog.querySelector(`[name="${key}"]`).value = e.querySelector(`.${key}`).innerText;
-        set('name');
-        set('hp-now');
-        set('hp-max');
-        set('mp-now');
-        set('mp-max');
-        set('eva');
-        set('def');
-        const set_npc = (key) => dialog.querySelector(`.npc [name="${key}"]`).value = e.querySelector(`.${key}`).innerText;
-        set_npc('acc');
-        set_npc('dmg');
-        dialog.showModal();
+        if (ev.ctrlKey) {
+            const e = ev.currentTarget;
+            selected_unit = e;
+            dialog.dataset.type = 'npc';
+            const set = (key) => dialog.querySelector(`[name="${key}"]`).value = e.querySelector(`.${key}`).innerText;
+            set('name');
+            set('hp-now');
+            set('hp-max');
+            set('mp-now');
+            set('mp-max');
+            set('eva');
+            set('def');
+            const set_npc = (key) => dialog.querySelector(`.npc [name="${key}"]`).value = e.querySelector(`.${key}`).innerText;
+            set_npc('acc');
+            set_npc('dmg');
+            dialog.showModal();
+        }
+        else {
+            unit_controll(ev.target);
+        }
     }
     dragstart(ev) {
         selected_unit = ev.currentTarget;
@@ -216,6 +226,30 @@ function npc_from_elem(elem) {
         now: Number(get('mp-now')),
         max: Number(get('mp-max')),
     }, !is_dialog ? elem : undefined);
+}
+function unit_controll(target) {
+    var _a;
+    const e = target.closest('.hp,.mp,.weapons');
+    if (e != null) {
+        if (e.classList.contains('hp')) {
+            const v = e.querySelector('.hp-now');
+            v.innerText = (Number(v.innerText) - 1).toString();
+        }
+        else if (e.classList.contains('mp')) {
+            const v = e.querySelector('.mp-now');
+            v.innerText = (Number(v.innerText) - 1).toString();
+        }
+        else if (e.classList.contains('weapons') && e.children.length > 0) {
+            const v = e.querySelector('&>.select');
+            if (v != null) {
+                v.classList.remove('select');
+                ((_a = v.nextElementSibling) !== null && _a !== void 0 ? _a : e.firstElementChild).classList.add('select');
+            }
+            else {
+                e.firstElementChild.classList.add('select');
+            }
+        }
+    }
 }
 function battle(atker, target) {
     var _a;
@@ -397,7 +431,7 @@ document.body.addEventListener('keydown', ev => {
 });
 function load_clipboard() {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a;
+        var _a, _b;
         try {
             // @ts-ignore
             const permission = yield navigator.permissions.query({ name: 'clipboard-read' });
@@ -410,7 +444,7 @@ function load_clipboard() {
             const weapon_num = Number(data.weaponNum);
             let weapon = [];
             for (let i = 1; i <= weapon_num; ++i) {
-                weapon.push(new Weapon((_a = data[`weapon${i}Name`]) !== null && _a !== void 0 ? _a : '', Number(data[`weapon${i}AccTotal`]), Number(data[`weapon${i}Rate`]), Number(data[`weapon${i}Crit`]), Number(data[`weapon${i}DmgTotal`])));
+                weapon.push(new Weapon((_a = data[`weapon${i}Name`]) !== null && _a !== void 0 ? _a : '', Number(data[`weapon${i}AccTotal`]), Number(data[`weapon${i}Rate`]), Number((_b = data[`weapon${i}Crit`]) !== null && _b !== void 0 ? _b : 10), Number(data[`weapon${i}DmgTotal`])));
             }
             const pc = new PC(data.characterName, { now: Number(data.hpTotal), max: Number(data.hpTotal) }, { now: Number(data.mpTotal), max: Number(data.mpTotal) }, Number(data.defenseTotal1Eva), Number(data.defenseTotal1Def), weapon);
             areas.item(1).appendChild(pc.elem);

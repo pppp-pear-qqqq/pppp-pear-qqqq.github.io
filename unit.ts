@@ -94,31 +94,35 @@ class PC implements Unit {
 	}
 
 	click(ev: MouseEvent) {
-		const e = ev.currentTarget as HTMLElement;
-		selected_unit = e;
-		dialog.dataset.type = 'pc';
-		const set = (key: string) => dialog.querySelector<HTMLInputElement>(`[name="${key}"]`)!.value = e.querySelector<HTMLElement>(`.${key}`)!.innerText;
-		set('name');
-		set('hp-now');
-		set('hp-max');
-		set('mp-now');
-		set('mp-max');
-		set('eva');
-		set('def');
-		const table = dialog.querySelector<HTMLTableSectionElement>('.pc>table>tbody')!;
-		while (table.rows.length > 0) table.deleteRow(0);
-		const temp_row = table.querySelector('template')!.content.firstElementChild!;
-		e.querySelectorAll('.weapon').forEach(e => {
-			const row = temp_row.cloneNode(true) as HTMLElement;
-			const set = (key: string) => row.querySelector<HTMLInputElement>(`[name="${key}"]`)!.value = e.querySelector<HTMLElement>(`.${key}`)!.innerText;
+		if (ev.ctrlKey) {
+			const e = ev.currentTarget as HTMLElement;
+			selected_unit = e;
+			dialog.dataset.type = 'pc';
+			const set = (key: string) => dialog.querySelector<HTMLInputElement>(`[name="${key}"]`)!.value = e.querySelector<HTMLElement>(`.${key}`)!.innerText;
 			set('name');
-			set('acc');
-			set('rate');
-			set('crit');
-			set('dmg');
-			table.insertRow().replaceWith(row);
-		})
-		dialog.showModal();
+			set('hp-now');
+			set('hp-max');
+			set('mp-now');
+			set('mp-max');
+			set('eva');
+			set('def');
+			const table = dialog.querySelector<HTMLTableSectionElement>('.pc>table>tbody')!;
+			while (table.rows.length > 0) table.deleteRow(0);
+			const temp_row = table.querySelector('template')!.content.firstElementChild!;
+			e.querySelectorAll('.weapon').forEach(e => {
+				const row = temp_row.cloneNode(true) as HTMLElement;
+				const set = (key: string) => row.querySelector<HTMLInputElement>(`[name="${key}"]`)!.value = e.querySelector<HTMLElement>(`.${key}`)!.innerText;
+				set('name');
+				set('acc');
+				set('rate');
+				set('crit');
+				set('dmg');
+				table.insertRow().replaceWith(row);
+			})
+			dialog.showModal();
+		} else {
+			unit_controll(ev.target as HTMLElement);
+		}
 	}
 	dragstart(ev: DragEvent) {
 		selected_unit = ev.currentTarget as HTMLElement;
@@ -213,21 +217,25 @@ class NPC implements Unit {
 		return elem;
 	}
 	click(ev: MouseEvent): void {
-		const e = ev.currentTarget as HTMLElement;
-		selected_unit = e;
-		dialog.dataset.type = 'npc';
-		const set = (key: string) => dialog.querySelector<HTMLInputElement>(`[name="${key}"]`)!.value = e.querySelector<HTMLElement>(`.${key}`)!.innerText;
-		set('name');
-		set('hp-now');
-		set('hp-max');
-		set('mp-now');
-		set('mp-max');
-		set('eva');
-		set('def');
-		const set_npc = (key: string) => dialog.querySelector<HTMLInputElement>(`.npc [name="${key}"]`)!.value = e.querySelector<HTMLElement>(`.${key}`)!.innerText;
-		set_npc('acc');
-		set_npc('dmg');
-		dialog.showModal();
+		if (ev.ctrlKey) {
+			const e = ev.currentTarget as HTMLElement;
+			selected_unit = e;
+			dialog.dataset.type = 'npc';
+			const set = (key: string) => dialog.querySelector<HTMLInputElement>(`[name="${key}"]`)!.value = e.querySelector<HTMLElement>(`.${key}`)!.innerText;
+			set('name');
+			set('hp-now');
+			set('hp-max');
+			set('mp-now');
+			set('mp-max');
+			set('eva');
+			set('def');
+			const set_npc = (key: string) => dialog.querySelector<HTMLInputElement>(`.npc [name="${key}"]`)!.value = e.querySelector<HTMLElement>(`.${key}`)!.innerText;
+			set_npc('acc');
+			set_npc('dmg');
+			dialog.showModal();
+		} else {
+			unit_controll(ev.target as HTMLElement);
+		}
 	}
 	dragstart(ev: DragEvent): void {
 		selected_unit = ev.currentTarget as HTMLElement;
@@ -266,6 +274,26 @@ function npc_from_elem(elem: HTMLElement | HTMLDialogElement) {
 		},
 		!is_dialog ? elem : undefined,
 	)
+}
+function unit_controll(target: HTMLElement) {
+	const e = target.closest('.hp,.mp,.weapons');
+	if (e != null) {
+		if (e.classList.contains('hp')) {
+			const v = e.querySelector<HTMLElement>('.hp-now')!;
+			v.innerText = (Number(v.innerText) - 1).toString();
+		} else if (e.classList.contains('mp')) {
+			const v = e.querySelector<HTMLElement>('.mp-now')!;
+			v.innerText = (Number(v.innerText) - 1).toString();
+		} else if (e.classList.contains('weapons') && e.children.length > 0) {
+			const v = e.querySelector('&>.select');
+			if (v != null) {
+				v.classList.remove('select');
+				(v.nextElementSibling ?? e.firstElementChild!).classList.add('select');
+			} else {
+				e.firstElementChild!.classList.add('select');
+			}
+		}
+	}
 }
 
 function battle(atker: PC | NPC, target: PC | NPC) {
@@ -452,7 +480,7 @@ async function load_clipboard() {
 				data[`weapon${i}Name`] ?? '',
 				Number(data[`weapon${i}AccTotal`]),
 				Number(data[`weapon${i}Rate`]),
-				Number(data[`weapon${i}Crit`]),
+				Number(data[`weapon${i}Crit`] ?? 10),
 				Number(data[`weapon${i}DmgTotal`]),
 			));
 		}

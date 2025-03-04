@@ -14,25 +14,44 @@
 		<div class="area"></div>
 		<div class="effect"></div>
 		<aside>
-			<div onclick="add_unit()">追加</div>
-			<div onclick="const [d,t]=roll();push_log(`2d6 -> [${t}] -> ${d}`)">2d6</div>
+			<div class="button" onclick="add_unit()">追加</div>
+			<div class="button" onclick="const [d,t]=roll();push_log(`2d6 -> [${t}] -> ${d}`)">2d6</div>
+			<section class="summary">
+				<ol>
+					<li>[追加]を押す</li>
+					<li>データを入力して完了を押す</li>
+					<li>盤面にユニットが追加される</li>
+				</ol>
+				<hr>
+				<ul>
+					<li>HP・MPのクリックで現在値を1減らす</li>
+					<li>武器名のクリックで使用武器変更</li>
+					<li>ドラッグ&ドロップで移動や物理攻撃</li>
+					<li>Ctrl+クリックで編集</li>
+				</ul>
+				<hr>
+				<div>
+					特定形式のJSONテキストをコピーし、追加メニューを開いた状態でCtrl+Vを押すと自動でデータが入力されたユニットが追加されます。<br>
+					<a href="https://yutorize.2-d.jp/ytsheet/sw2.5/" target="_blank">ゆとシート</a>のキャラクターシートにて、[出力->JSON形式]で対応形式のJSONファイルをダウンロードできます。
+				</div>
+			</section>
 		</aside>
 		<template>
 			<article class="unit pc" draggable="true">
 				<div class="name"></div>
-				<div>
+				<div class="hp button">
 					<span>HP</span>
 					<span class="hp-now"></span>
 					<span>/</span>
 					<span class="hp-max"></span>
 				</div>
-				<div>
+				<div class="mp button">
 					<span>MP</span>
 					<span class="mp-now"></span>
 					<span>/</span>
 					<span class="mp-max"></span>
 				</div>
-				<div class="weapons"></div>
+				<div class="weapons button"></div>
 				<div hidden>
 					<span type="number" class="eva"></span>
 					<span type="number" class="def"></span>
@@ -40,13 +59,13 @@
 			</article>
 			<article class="unit simple" draggable="true">
 				<div class="name"></div>
-				<div>
+				<div class="hp">
 					<span>HP</span>
 					<span class="hp-now"></span>
 					<span>/</span>
 					<span class="hp-max"></span>
 				</div>
-				<div>
+				<div class="mp">
 					<span>MP</span>
 					<span class="mp-now"></span>
 					<span>/</span>
