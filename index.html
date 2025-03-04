@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<head>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="style.css">
+	<script src="table_controll.js"></script>
+	<script src="unit.js" defer></script>
+</head>
+<body>
+	<main>
+		<h2>Field</h2>
+		<div class="effect"></div>
+		<div class="area"></div>
+		<div class="area"></div>
+		<div class="area"></div>
+		<div class="effect"></div>
+		<aside>
+			<div onclick="add_unit()">追加</div>
+			<div onclick="const [d,t]=roll();push_log(`2d6 -> [${t}] -> ${d}`)">2d6</div>
+		</aside>
+		<template>
+			<article class="unit pc" draggable="true">
+				<div class="name"></div>
+				<div>
+					<span>HP</span>
+					<span class="hp-now"></span>
+					<span>/</span>
+					<span class="hp-max"></span>
+				</div>
+				<div>
+					<span>MP</span>
+					<span class="mp-now"></span>
+					<span>/</span>
+					<span class="mp-max"></span>
+				</div>
+				<div class="weapons"></div>
+				<div hidden>
+					<span type="number" class="eva"></span>
+					<span type="number" class="def"></span>
+				</div>
+			</article>
+			<article class="unit simple" draggable="true">
+				<div class="name"></div>
+				<div>
+					<span>HP</span>
+					<span class="hp-now"></span>
+					<span>/</span>
+					<span class="hp-max"></span>
+				</div>
+				<div>
+					<span>MP</span>
+					<span class="mp-now"></span>
+					<span>/</span>
+					<span class="mp-max"></span>
+				</div>
+				<div hidden>
+					<span type="number" class="acc"></span>
+					<span type="number" class="rate"></span>
+					<span type="number" class="crit"></span>
+					<span type="number" class="dmg"></span>
+					<span type="number" class="eva"></span>
+					<span type="number" class="def"></span>
+				</div>
+			</article>
+			<div class="weapon">
+				<div class="name"></div>
+				<div hidden>
+					<span class="acc"></span>
+					<span class="rate"></span>
+					<span class="crit"></span>
+					<span class="dmg"></span>
+				</div>
+			</div>
+		</template>
+	</main>
+	<aside>
+		<h2>Log</h2>
+		<output id="log"></output>
+	</aside>
+	<dialog id="unit" data-type="pc">
+		<div class="header">
+			<input type="text" name="name" placeholder="名前">
+			<span class="button" onclick="const e=this.closest('dialog').dataset;switch(e.type){case'pc':e.type='npc';break;case'npc':e.type='pc';break;default:e.type='npc'}">PC &lt;-&gt; NPC</span>
+			<span class="delete button" onclick="delete_unit();this.closest('dialog').close()">削除</span>
+		</div>
+		<table class="status">
+			<tbody>
+				<tr>
+					<th>HP</td>
+					<td><input type="number" name="hp-now"></td>
+					<td>/</td>
+					<td><input type="number" name="hp-max"></td>
+				</tr>
+				<tr>
+					<th>MP</td>
+					<td><input type="number" name="mp-now"></td>
+					<td>/</td>
+					<td><input type="number" name="mp-max"></td>
+				</tr>
+				<tr class="npc">
+					<th>命中力</th>
+					<td colspan="3"><input type="number" name="acc"></td>
+				</tr>
+				<tr class="npc">
+					<th>打撃点</th>
+					<td colspan="3"><input type="number" name="dmg"></td>
+				</tr>
+				<tr>
+					<th>回避力</td>
+					<td colspan="3"><input type="number" name="eva"></td>
+				</tr>
+				<tr>
+					<th>防護点</td>
+					<td colspan="3"><input type="number" name="def"></td>
+				</tr>
+			</tbody>
+		</table>
+		<div class="pc">
+			<table>
+				<thead>
+					<tr>
+						<th class="name">名称</th>
+						<th class="acc">命中力</th>
+						<th class="rate">威力</th>
+						<th class="crit">C値</th>
+						<th class="dmg">追加D</th>
+					</tr>
+				</thead>
+				<tbody>
+					<template>
+						<tr class="weapon">
+							<td><input type="text" name="name"></td>
+							<td><input type="number" name="acc" value="0"></td>
+							<td><input type="number" name="rate"></td>
+							<td><input type="number" name="crit" value="10"></td>
+							<td><input type="number" name="dmg" value="0"></td>
+						</tr>
+					</template>
+				</tbody>
+			</table>
+			<div class="table-controll">
+				<a onclick="add_column(this.parentElement.previousElementSibling)" class="add button">▼</a>
+				<a onclick="remove_column(this.parentElement.previousElementSibling)" class="remove button">▲</a>
+			</div>
+		</div>
+		<div class="close button" onclick="this.closest('dialog').close()">
+			<span>完了</span>
+		</div>
+	</dialog>
+</body>
