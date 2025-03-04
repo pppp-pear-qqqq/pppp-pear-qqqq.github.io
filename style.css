@@ -82,15 +82,24 @@ body {
     }
 
     >aside {
-        width: 30rem;
         display: flex;
         flex-direction: column;
         gap: 12px;
 
+        >* {
+            width: calc(40rem + 16px);
+            padding: 8px;
+        }
         >output {
             flex-grow: 1;
             border: 1px dotted;
             border-radius: 4px;
+        }
+        >textarea {
+            height: calc(6rlh + 16px);
+            border: 1px solid;
+            border-radius: 4px;
+            resize: vertical;
         }
     }
 }
