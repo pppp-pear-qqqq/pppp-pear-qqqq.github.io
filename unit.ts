@@ -43,6 +43,7 @@ interface Unit {
 	mp: Meter;
 	eva: number;
 	def: number;
+	self: HTMLElement | null;
 
 	get elem(): HTMLElement;
 	click(ev: MouseEvent): void;
@@ -57,8 +58,9 @@ class PC implements Unit {
 	def: number;
 	weapon: Weapon[];
 	weapon_idx: number;
+	self: HTMLElement | null;
 
-	constructor(name: string, hp: Meter, mp: Meter, eva: number, def: number, weapon: Weapon[], weapon_idx?: number) {
+	constructor(name: string, hp: Meter, mp: Meter, eva: number, def: number, weapon: Weapon[], weapon_idx?: number, self?: HTMLElement) {
 		this.name = name;
 		this.hp = hp;
 		this.mp = mp;
@@ -66,6 +68,7 @@ class PC implements Unit {
 		this.def = def;
 		this.weapon = weapon;
 		this.weapon_idx = weapon_idx ?? 0;
+		this.self = self ?? null;
 	}
 
 	public get elem() {
@@ -122,10 +125,13 @@ class PC implements Unit {
 	}
 	drop(ev: DragEvent) {
 		const e = ev.currentTarget as HTMLElement;
-		if (e.classList.contains('pc')) {
-			battle([this, this.weapon_idx], pc_from_elem(e));
-		} else {
-			battle([this, this.weapon_idx], npc_from_elem(e));
+		if (selected_unit != null && selected_unit !== e) {
+			const atker = pc_from_elem(selected_unit);
+			if (e.classList.contains('pc')) {
+				battle(atker, pc_from_elem(e));
+			} else {
+				battle(atker, npc_from_elem(e));
+			}
 		}
 	}
 }
@@ -165,6 +171,7 @@ function pc_from_elem(elem: HTMLElement | HTMLDialogElement) {
 		Number(get('def')),
 		weapon,
 		weapon_idx,
+		!is_dialog ? elem : undefined,
 	)
 }
 class NPC implements Unit {
@@ -175,8 +182,9 @@ class NPC implements Unit {
 	def: number;
 	acc: number;
 	dmg: number;
+	self: HTMLElement | null;
 
-	constructor(name: string, acc: number, dmg: number, eva: number, def: number, hp: Meter, mp: Meter) {
+	constructor(name: string, acc: number, dmg: number, eva: number, def: number, hp: Meter, mp: Meter, self?: HTMLElement) {
 		this.name = name;
 		this.hp = hp;
 		this.mp = mp;
@@ -184,6 +192,7 @@ class NPC implements Unit {
 		this.def = def;
 		this.acc = acc;
 		this.dmg = dmg;
+		this.self = self ?? null;
 	}
 
 	get elem(): HTMLElement {
@@ -225,17 +234,22 @@ class NPC implements Unit {
 	}
 	drop(ev: DragEvent): void {
 		const e = ev.currentTarget as HTMLElement;
-		if (e.classList.contains('pc')) {
-			battle(this, pc_from_elem(e));
-		} else {
-			battle(this, npc_from_elem(e));
+		if (selected_unit != null && selected_unit !== e) {
+			const atker = npc_from_elem(selected_unit);
+			if (e.classList.contains('pc')) {
+				battle(atker, pc_from_elem(e));
+			} else {
+				battle(atker, npc_from_elem(e));
+			}
 		}
 	}
 }
 function npc_from_elem(elem: HTMLElement | HTMLDialogElement) {
-	let get;
-	if (elem instanceof HTMLDialogElement) get = (key: string) => elem.querySelector<HTMLInputElement>(`[name="${key}"]`)!.value;
-	else get = (key: string) => elem.querySelector<HTMLElement>(`.${key}`)!.innerText;
+	const is_dialog = elem instanceof HTMLDialogElement;
+	const get = (key: string) => {
+		if (is_dialog) return elem.querySelector<HTMLInputElement>(`[name="${key}"]`)!.value;
+		else return elem.querySelector<HTMLElement>(`.${key}`)!.innerText;
+	};
 	return new NPC(
 		get('name'),
 		Number(get('acc')),
@@ -250,16 +264,17 @@ function npc_from_elem(elem: HTMLElement | HTMLDialogElement) {
 			now: Number(get('mp-now')),
 			max: Number(get('mp-max')),
 		},
+		!is_dialog ? elem : undefined,
 	)
 }
 
-function battle(atker: [PC, number] | NPC, target: PC | NPC) {
+function battle(atker: PC | NPC, target: PC | NPC) {
 	const [acc, acc_text] = ((): [number, string] => {
 		if (atker instanceof NPC) {
 			return [atker.acc, atker.acc.toString()];
 		} else {
-			console.log(atker[0], atker[1]);
-			const weapon = atker[0].weapon[atker[1]];
+			console.log(atker, target);
+			const weapon = atker.weapon[atker.weapon_idx];
 			const [dice, dice_text] = roll();
 			return [dice + weapon.acc, `([${dice_text}]->${dice}+${weapon.acc})`];
 		}
@@ -278,7 +293,7 @@ function battle(atker: [PC, number] | NPC, target: PC | NPC) {
 				const [dice, dice_text] = roll();
 				return [dice + atker.dmg, `([${dice_text}]->${dice}+${atker.dmg})`];
 			} else {
-				const weapon = atker[0].weapon[atker[1]];
+				const weapon = atker.weapon[atker.weapon_idx];
 				const [power, power_text, dice_text, spin] = rate(weapon.rate, weapon.crit);
 				let dmg_text = `(${weapon.rate}[${weapon.crit}]->[${dice_text}]=${power_text}->${power}+${weapon.dmg})`;
 				if (spin > 0) dmg_text += `(${spin}回転)`;
@@ -290,6 +305,10 @@ function battle(atker: [PC, number] | NPC, target: PC | NPC) {
 			dmg = Math.max(dmg - target.def, 0);
 			dmg_text += ` - def${target.def}`;
 			target.hp.now -= dmg;
+			const hp = target.self?.querySelector<HTMLElement>('.hp-now');
+			if (hp != null) {
+				hp.innerText = target.hp.now.toString();
+			}
 		}
 		push_log(`命中 <small>acc${acc}${acc_text} > eva${eva}${eva_text}</small><br>${dmg}ダメージ！ <small>${dmg_text}</small>`);
 	} else {
@@ -399,9 +418,11 @@ areas.forEach(e => {
 	e.addEventListener('dragover', ev => ev.preventDefault());
 	e.addEventListener('drop', (ev: DragEvent) => {
 		if (selected_unit != null) {
-			const e = ev.currentTarget as HTMLElement;
-			e.appendChild(selected_unit);
-			selected_unit = null;
+			const e = ev.target as HTMLElement;
+			if (e.classList.contains('area')) {
+				e.appendChild(selected_unit);
+				selected_unit = null;
+			}
 		}
 	});
 })

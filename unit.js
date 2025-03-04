@@ -35,7 +35,7 @@ class Weapon {
     }
 }
 class PC {
-    constructor(name, hp, mp, eva, def, weapon, weapon_idx) {
+    constructor(name, hp, mp, eva, def, weapon, weapon_idx, self) {
         this.name = name;
         this.hp = hp;
         this.mp = mp;
@@ -43,6 +43,7 @@ class PC {
         this.def = def;
         this.weapon = weapon;
         this.weapon_idx = weapon_idx !== null && weapon_idx !== void 0 ? weapon_idx : 0;
+        this.self = self !== null && self !== void 0 ? self : null;
     }
     get elem() {
         const elem = temp_pc.cloneNode(true);
@@ -99,11 +100,14 @@ class PC {
     }
     drop(ev) {
         const e = ev.currentTarget;
-        if (e.classList.contains('pc')) {
-            battle([this, this.weapon_idx], pc_from_elem(e));
-        }
-        else {
-            battle([this, this.weapon_idx], npc_from_elem(e));
+        if (selected_unit != null && selected_unit !== e) {
+            const atker = pc_from_elem(selected_unit);
+            if (e.classList.contains('pc')) {
+                battle(atker, pc_from_elem(e));
+            }
+            else {
+                battle(atker, npc_from_elem(e));
+            }
         }
     }
 }
@@ -134,10 +138,10 @@ function pc_from_elem(elem) {
     }, {
         now: Number(get('mp-now')),
         max: Number(get('mp-max')),
-    }, Number(get('eva')), Number(get('def')), weapon, weapon_idx);
+    }, Number(get('eva')), Number(get('def')), weapon, weapon_idx, !is_dialog ? elem : undefined);
 }
 class NPC {
-    constructor(name, acc, dmg, eva, def, hp, mp) {
+    constructor(name, acc, dmg, eva, def, hp, mp, self) {
         this.name = name;
         this.hp = hp;
         this.mp = mp;
@@ -145,6 +149,7 @@ class NPC {
         this.def = def;
         this.acc = acc;
         this.dmg = dmg;
+        this.self = self !== null && self !== void 0 ? self : null;
     }
     get elem() {
         const elem = temp_npc.cloneNode(true);
@@ -185,36 +190,42 @@ class NPC {
     }
     drop(ev) {
         const e = ev.currentTarget;
-        if (e.classList.contains('pc')) {
-            battle(this, pc_from_elem(e));
-        }
-        else {
-            battle(this, npc_from_elem(e));
+        if (selected_unit != null && selected_unit !== e) {
+            const atker = npc_from_elem(selected_unit);
+            if (e.classList.contains('pc')) {
+                battle(atker, pc_from_elem(e));
+            }
+            else {
+                battle(atker, npc_from_elem(e));
+            }
         }
     }
 }
 function npc_from_elem(elem) {
-    let get;
-    if (elem instanceof HTMLDialogElement)
-        get = (key) => elem.querySelector(`[name="${key}"]`).value;
-    else
-        get = (key) => elem.querySelector(`.${key}`).innerText;
+    const is_dialog = elem instanceof HTMLDialogElement;
+    const get = (key) => {
+        if (is_dialog)
+            return elem.querySelector(`[name="${key}"]`).value;
+        else
+            return elem.querySelector(`.${key}`).innerText;
+    };
     return new NPC(get('name'), Number(get('acc')), Number(get('dmg')), Number(get('eva')), Number(get('def')), {
         now: Number(get('hp-now')),
         max: Number(get('hp-max')),
     }, {
         now: Number(get('mp-now')),
         max: Number(get('mp-max')),
-    });
+    }, !is_dialog ? elem : undefined);
 }
 function battle(atker, target) {
+    var _a;
     const [acc, acc_text] = (() => {
         if (atker instanceof NPC) {
             return [atker.acc, atker.acc.toString()];
         }
         else {
-            console.log(atker[0], atker[1]);
-            const weapon = atker[0].weapon[atker[1]];
+            console.log(atker, target);
+            const weapon = atker.weapon[atker.weapon_idx];
             const [dice, dice_text] = roll();
             return [dice + weapon.acc, `([${dice_text}]->${dice}+${weapon.acc})`];
         }
@@ -235,7 +246,7 @@ function battle(atker, target) {
                 return [dice + atker.dmg, `([${dice_text}]->${dice}+${atker.dmg})`];
             }
             else {
-                const weapon = atker[0].weapon[atker[1]];
+                const weapon = atker.weapon[atker.weapon_idx];
                 const [power, power_text, dice_text, spin] = rate(weapon.rate, weapon.crit);
                 let dmg_text = `(${weapon.rate}[${weapon.crit}]->[${dice_text}]=${power_text}->${power}+${weapon.dmg})`;
                 if (spin > 0)
@@ -249,6 +260,10 @@ function battle(atker, target) {
             dmg = Math.max(dmg - target.def, 0);
             dmg_text += ` - def${target.def}`;
             target.hp.now -= dmg;
+            const hp = (_a = target.self) === null || _a === void 0 ? void 0 : _a.querySelector('.hp-now');
+            if (hp != null) {
+                hp.innerText = target.hp.now.toString();
+            }
         }
         push_log(`命中 <small>acc${acc}${acc_text} > eva${eva}${eva_text}</small><br>${dmg}ダメージ！ <small>${dmg_text}</small>`);
     }
@@ -362,9 +377,11 @@ areas.forEach(e => {
     e.addEventListener('dragover', ev => ev.preventDefault());
     e.addEventListener('drop', (ev) => {
         if (selected_unit != null) {
-            const e = ev.currentTarget;
-            e.appendChild(selected_unit);
-            selected_unit = null;
+            const e = ev.target;
+            if (e.classList.contains('area')) {
+                e.appendChild(selected_unit);
+                selected_unit = null;
+            }
         }
     });
 });
