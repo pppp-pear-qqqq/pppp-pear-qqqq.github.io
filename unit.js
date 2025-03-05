@@ -105,13 +105,8 @@ class PC {
     drop(ev) {
         const e = ev.currentTarget;
         if (selected_unit != null && selected_unit !== e) {
-            const atker = pc_from_elem(selected_unit);
-            if (e.classList.contains('pc')) {
-                battle(atker, pc_from_elem(e));
-            }
-            else {
-                battle(atker, npc_from_elem(e));
-            }
+            const atker = selected_unit.classList.contains('pc') ? pc_from_elem : npc_from_elem;
+            battle(atker(selected_unit), pc_from_elem(e));
         }
     }
 }
@@ -200,13 +195,8 @@ class NPC {
     drop(ev) {
         const e = ev.currentTarget;
         if (selected_unit != null && selected_unit !== e) {
-            const atker = npc_from_elem(selected_unit);
-            if (e.classList.contains('pc')) {
-                battle(atker, pc_from_elem(e));
-            }
-            else {
-                battle(atker, npc_from_elem(e));
-            }
+            const atker = selected_unit.classList.contains('pc') ? pc_from_elem : npc_from_elem;
+            battle(atker(selected_unit), npc_from_elem(e));
         }
     }
 }
@@ -269,10 +259,7 @@ function check_res(dice) {
 function battle(atker, target) {
     var _a;
     const [acc, acc_text, acc_res] = (() => {
-        if (atker instanceof NPC) {
-            return [atker.acc, atker.acc.toString(), Res.Normal];
-        }
-        else {
+        if (atker instanceof PC) {
             const weapon = atker.weapon[atker.weapon_idx];
             const [dice, dice_text] = roll();
             const res = check_res(dice);
@@ -282,12 +269,12 @@ function battle(atker, target) {
                 case Res.Critical: return [dice + weapon.acc + 5, `([${dice_text}]->${dice}+${weapon.acc}+Crit)`, res];
             }
         }
+        else {
+            return [atker.acc, `(${atker.acc})`, Res.Normal];
+        }
     })();
     const [eva, eva_text, eva_res] = (() => {
-        if (target instanceof NPC) {
-            return [target.eva, target.eva.toString(), Res.Normal];
-        }
-        else {
+        if (target instanceof PC) {
             const [dice, dice_text] = roll();
             const res = check_res(dice);
             switch (res) {
@@ -295,6 +282,9 @@ function battle(atker, target) {
                 case Res.Normal: return [dice + target.eva, `([${dice_text}]->${dice}+${target.eva})`, res];
                 case Res.Critical: return [dice + target.eva + 5, `([${dice_text}]->${dice}+${target.eva}+Crit)`, res];
             }
+        }
+        else {
+            return [target.eva, `(${target.eva})`, Res.Normal];
         }
     })();
     if ((acc_res === Res.Critical && eva_res !== Res.Critical) || (eva_res !== Res.Critical && acc > eva)) {
