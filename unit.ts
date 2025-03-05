@@ -326,7 +326,7 @@ function battle(atker: PC | NPC, target: PC | NPC) {
 			return [target.eva, `(${target.eva})`, Res.Normal];
 		}
 	})()
-	if ((acc_res === Res.Critical && eva_res !== Res.Critical) || (eva_res !== Res.Critical && acc > eva)) {
+	if (acc_res !== Res.Fumble && (eva_res !== Res.Critical || acc_res === Res.Critical) && (eva_res === Res.Fumble || (acc_res === Res.Critical && eva_res !== Res.Critical) || acc > eva)) {
 		let [dmg, dmg_text] = ((): [number, string] => {
 			if (atker instanceof NPC) {
 				const [dice, dice_text] = roll();
