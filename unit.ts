@@ -1,5 +1,5 @@
 const temp_pc = document.querySelector<HTMLTemplateElement>('main>template')!.content.querySelector('.unit.pc')!;
-const temp_npc = document.querySelector<HTMLTemplateElement>('main>template')!.content.querySelector('.unit.simple')!;
+const temp_npc = document.querySelector<HTMLTemplateElement>('main>template')!.content.querySelector('.unit.npc')!;
 const temp_weapon = document.querySelector<HTMLTemplateElement>('main>template')!.content.querySelector('.weapon')!;
 const dialog = document.querySelector<HTMLDialogElement>('dialog#unit')!;
 const areas = document.querySelectorAll<HTMLElement>('main>.area');
