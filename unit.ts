@@ -349,9 +349,9 @@ function battle(atker: PC | NPC, target: PC | NPC) {
 				hp.innerText = target.hp.now.toString();
 			}
 		}
-		push_log(`命中 <small>acc${acc}${acc_text} > eva${eva}${eva_text}</small><br>${dmg}ダメージ！ <small>${dmg_text}</small>`);
+		push_log(`攻撃 <span class="info">${atker.name}->${target.name}</span> <span class="highlight">命中</span> <span class="info">acc${acc}${acc_text} > eva${eva}${eva_text}</span><br>${dmg}ダメージ！ <span class="info">${dmg_text}</span>`);
 	} else {
-		push_log(`回避 <small>acc${acc}${acc_text} <= eva${eva}${eva_text}</small>`);
+		push_log(`攻撃 <span class="info">${atker.name}->${target.name}</span> <span class="highlight">回避</span> <span class="info">acc${acc}${acc_text} <= eva${eva}${eva_text}</span>`);
 	}
 }
 function roll(dice: number = 2): [number, string] {
