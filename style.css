@@ -19,6 +19,10 @@ a[href] {
     color: var(--color-link);
 }
 
+html,input,textarea {
+    font-family: "Kiwi Maru", serif;
+}
+
 body {
     display: flex;
     height: 100vh;
@@ -140,7 +144,7 @@ body {
         flex-direction: column;
         gap: 12px;
 
-        >* {
+        >*:not(h2) {
             width: calc(40rem + 16px);
             padding: 8px;
         }
@@ -180,7 +184,7 @@ body {
     >textarea {
         font-size: 1rem;
         line-height: 1rlh;
-        height: 1lh;
+        height: 0;
         border: none;
         resize: none;
         overflow: hidden;

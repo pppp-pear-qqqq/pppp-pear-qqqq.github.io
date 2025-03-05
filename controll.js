@@ -27,6 +27,7 @@ function log_click(ev) {
     });
     item.value = e.innerHTML.replace(/<br>/g, '\n');
     e.replaceWith(item);
+    item.style.height = `${item.scrollHeight}px`;
     item.focus();
 }
 function log_focusout(ev) {
