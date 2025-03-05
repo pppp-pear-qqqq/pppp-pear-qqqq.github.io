@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 const temp_pc = document.querySelector('main>template').content.querySelector('.unit.pc');
-const temp_npc = document.querySelector('main>template').content.querySelector('.unit.simple');
+const temp_npc = document.querySelector('main>template').content.querySelector('.unit.npc');
 const temp_weapon = document.querySelector('main>template').content.querySelector('.weapon');
 const dialog = document.querySelector('dialog#unit');
 const areas = document.querySelectorAll('main>.area');
