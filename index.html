@@ -123,7 +123,8 @@
 	<dialog id="unit" data-type="pc">
 		<div class="header">
 			<input type="text" name="name" placeholder="名前">
-			<span class="button" onclick="const e=this.closest('dialog').dataset;switch(e.type){case'pc':e.type='npc';break;case'npc':e.type='pc';break;default:e.type='npc'}">PC &lt;-&gt; NPC</span>
+			<span class="button" onclick="const e=this.closest('dialog').dataset;switch(e.type){case'pc':e.type='npc';break;case'npc':e.type='pc';break;default:e.type='npc'}">PC&lt;-&gt;NPC</span>
+			<span class="button" onclick="selected_unit=null;this.closest('dialog').close()">複製</span>
 			<span class="delete button" onclick="delete_unit();this.closest('dialog').close()">削除</span>
 		</div>
 		<table class="status">
