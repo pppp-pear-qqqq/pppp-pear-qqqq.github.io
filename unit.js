@@ -270,7 +270,7 @@ function battle(atker, target) {
             }
         }
         else {
-            return [atker.acc, `(${atker.acc})`, Res.Normal];
+            return [atker.acc, '', Res.Normal];
         }
     })();
     const [eva, eva_text, eva_res] = (() => {
@@ -284,7 +284,7 @@ function battle(atker, target) {
             }
         }
         else {
-            return [target.eva, `(${target.eva})`, Res.Normal];
+            return [target.eva, '', Res.Normal];
         }
     })();
     if (acc_res !== Res.Fumble && (eva_res !== Res.Critical || acc_res === Res.Critical) && (eva_res === Res.Fumble || (acc_res === Res.Critical && eva_res !== Res.Critical) || acc > eva)) {

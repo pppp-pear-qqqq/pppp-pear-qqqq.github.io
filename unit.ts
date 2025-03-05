@@ -310,7 +310,7 @@ function battle(atker: PC | NPC, target: PC | NPC) {
 				case Res.Critical: return [dice + weapon.acc + 5, `([${dice_text}]->${dice}+${weapon.acc}+Crit)`, res];
 			}
 		} else {
-			return [atker.acc, `(${atker.acc})`, Res.Normal];
+			return [atker.acc, '', Res.Normal];
 		}
 	})()
 	const [eva, eva_text, eva_res] = ((): [number, string, Res] => {
@@ -323,7 +323,7 @@ function battle(atker: PC | NPC, target: PC | NPC) {
 				case Res.Critical: return [dice + target.eva + 5, `([${dice_text}]->${dice}+${target.eva}+Crit)`, res];
 			}
 		} else {
-			return [target.eva, `(${target.eva})`, Res.Normal];
+			return [target.eva, '', Res.Normal];
 		}
 	})()
 	if (acc_res !== Res.Fumble && (eva_res !== Res.Critical || acc_res === Res.Critical) && (eva_res === Res.Fumble || (acc_res === Res.Critical && eva_res !== Res.Critical) || acc > eva)) {
