@@ -1,18 +1,18 @@
 "use strict";
 const log = document.querySelector('#log');
 function add_column(table, class_name, body_index) {
-    const body = table.tBodies[body_index !== null && body_index !== void 0 ? body_index : 0];
+    const body = table.tBodies[body_index ?? 0];
     const temp = body.querySelector('template').content;
     const item = class_name != null ? temp.querySelector(`.${class_name}`) : temp.firstElementChild;
     const row = body.insertRow();
     row.replaceWith(item.cloneNode(true));
 }
 function remove_column(table, body_index) {
-    table.tBodies[body_index !== null && body_index !== void 0 ? body_index : 0].deleteRow(-1);
+    table.tBodies[body_index ?? 0].deleteRow(-1);
 }
 function push_log(text) {
     const div = document.createElement('div');
-    div.innerHTML = text !== null && text !== void 0 ? text : '';
+    div.innerHTML = text ?? '';
     div.addEventListener('click', log_click);
     log.appendChild(div);
     log.scroll(0, log.scrollHeight);
@@ -86,15 +86,32 @@ function log_to_blob(type) {
 }
 {
     const log = document.querySelector('[name="log"]');
-    log === null || log === void 0 ? void 0 : log.addEventListener('keydown', ev => {
+    log?.addEventListener('keydown', ev => {
         if (ev.shiftKey && ev.key == 'Enter') {
             if (log.value != '') {
-                push_log(log.value.replace(/\r|\n|\r\n/g, '<br>'));
+                const text = log.value
+                    .replace(/\r|\n|\r\n/g, '<br>')
+                    .replaceAll(/(^|\s+)(\d+)d6/g, (match, _, num) => {
+                    const [result, text] = roll(Number(num));
+                    return `${match}<span class="info"> -> [${text}] -> </span>${result}`;
+                })
+                    .replaceAll(/(^|\s+)k(\d+)(@(\d+))?/g, (match, _0, power, _1, crit) => {
+                    const [result, text, powers, spin] = rate(Number(power), Number(crit));
+                    let result_text = `${match}<span class="info"> -> [${text}]=${powers} -> </span>`;
+                    if (spin > 0)
+                        result_text += `${result}<span class="info">(${spin}回転)</span>`;
+                    else if (spin < 0)
+                        result_text += '自動失敗';
+                    else
+                        result_text += result.toString();
+                    return result_text;
+                });
+                push_log(text);
                 message.push('push-free-log');
             }
         }
     });
-    log === null || log === void 0 ? void 0 : log.addEventListener('input', () => {
+    log?.addEventListener('input', ev => {
         if (message.includes('push-free-log')) {
             message = message.filter(e => e !== 'push-free-log');
             log.value = '';

@@ -88,12 +88,26 @@ function log_to_blob(type: '.txt' | '.html' | '.json') {
 	log?.addEventListener('keydown', ev => {
 		if (ev.shiftKey && ev.key == 'Enter') {
 			if (log.value != '') {
-				push_log(log.value.replace(/\r|\n|\r\n/g, '<br>'));
+				const text = log.value
+					.replace(/\r|\n|\r\n/g, '<br>')
+					.replaceAll(/(^|\s+)(\d+)d6/g, (match, _, num: string) => {
+						const [result, text] = roll(Number(num));
+						return `${match}<span class="info"> -> [${text}] -> </span>${result}`;
+					})
+					.replaceAll(/(^|\s+)k(\d+)(@(\d+))?/g, (match, _0, power: string, _1, crit: string) => {
+						const [result, text, powers, spin] = rate(Number(power), Number(crit));
+						let result_text = `${match}<span class="info"> -> [${text}]=${powers} -> </span>`;
+						if (spin > 0) result_text += `${result}<span class="info">(${spin}回転)</span>`;
+						else if (spin < 0) result_text += '自動失敗';
+						else result_text += result.toString();
+						return result_text;
+					})
+				push_log(text);
 				message.push('push-free-log');
 			}
 		}
 	})
-	log?.addEventListener('input', () => {
+	log?.addEventListener('input', ev => {
 		if (message.includes('push-free-log')) {
 			message = message.filter(e => e !== 'push-free-log');
 			log.value = '';

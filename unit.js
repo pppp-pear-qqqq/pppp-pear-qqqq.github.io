@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 const temp_pc = document.querySelector('main>template').content.querySelector('.unit.pc');
 const temp_npc = document.querySelector('main>template').content.querySelector('.unit.npc');
 const temp_weapon = document.querySelector('main>template').content.querySelector('.weapon');
@@ -41,8 +32,8 @@ class PC {
         this.eva = eva;
         this.def = def;
         this.weapon = weapon;
-        this.weapon_idx = weapon_idx !== null && weapon_idx !== void 0 ? weapon_idx : 0;
-        this.self = self !== null && self !== void 0 ? self : null;
+        this.weapon_idx = weapon_idx ?? 0;
+        this.self = self ?? null;
     }
     get elem() {
         const elem = temp_pc.cloneNode(true);
@@ -149,7 +140,7 @@ class NPC {
         this.def = def;
         this.acc = acc;
         this.dmg = dmg;
-        this.self = self !== null && self !== void 0 ? self : null;
+        this.self = self ?? null;
     }
     get elem() {
         const elem = temp_npc.cloneNode(true);
@@ -218,7 +209,6 @@ function npc_from_elem(elem) {
     }, !is_dialog ? elem : undefined);
 }
 function unit_controll(target, is_shift) {
-    var _a, _b;
     const e = target.closest('.hp,.mp,.weapons');
     if (e != null) {
         if (e.classList.contains('hp')) {
@@ -234,9 +224,9 @@ function unit_controll(target, is_shift) {
             if (v != null) {
                 v.classList.remove('select');
                 if (is_shift)
-                    ((_a = v.previousElementSibling) !== null && _a !== void 0 ? _a : e.lastElementChild).classList.add('select');
+                    (v.previousElementSibling ?? e.lastElementChild).classList.add('select');
                 else
-                    ((_b = v.nextElementSibling) !== null && _b !== void 0 ? _b : e.firstElementChild).classList.add('select');
+                    (v.nextElementSibling ?? e.firstElementChild).classList.add('select');
             }
             else {
                 e.firstElementChild.classList.add('select');
@@ -261,7 +251,6 @@ function check_res(dice) {
         return Res.Normal;
 }
 function battle(atker, target) {
-    var _a;
     const [acc, acc_text, acc_res] = (() => {
         if (atker instanceof PC) {
             const weapon = atker.weapon[atker.weapon_idx];
@@ -312,7 +301,7 @@ function battle(atker, target) {
             dmg = Math.max(dmg - target.def, 0);
             dmg_text += ` - def${target.def}`;
             target.hp.now -= dmg;
-            const hp = (_a = target.self) === null || _a === void 0 ? void 0 : _a.querySelector('.hp-now');
+            const hp = target.self?.querySelector('.hp-now');
             if (hp != null) {
                 hp.innerText = target.hp.now.toString();
             }
@@ -399,28 +388,25 @@ document.body.addEventListener('keydown', ev => {
         }
     }
 });
-function load_clipboard() {
-    return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b, _c, _d, _e;
-        try {
-            // @ts-ignore
-            const permission = yield navigator.permissions.query({ name: 'clipboard-read' });
-            console.log('Permission state:', permission.state);
-            const text = yield navigator.clipboard.readText();
-            if (!text)
-                throw new Error('クリップボードが空です');
-            const data = JSON.parse(text);
-            console.log('Parsed data:', data);
-            const weapon_num = Number(data.weaponNum);
-            let weapon = [];
-            for (let i = 1; i <= weapon_num; ++i) {
-                weapon.push(new Weapon((_a = data[`weapon${i}Name`]) !== null && _a !== void 0 ? _a : '', Number((_b = data[`weapon${i}AccTotal`]) !== null && _b !== void 0 ? _b : 0), Number((_c = data[`weapon${i}Rate`]) !== null && _c !== void 0 ? _c : 0), Number((_d = data[`weapon${i}Crit`]) !== null && _d !== void 0 ? _d : 10), Number((_e = data[`weapon${i}DmgTotal`]) !== null && _e !== void 0 ? _e : 0)));
-            }
-            const pc = new PC(data.characterName, { now: Number(data.hpTotal), max: Number(data.hpTotal) }, { now: Number(data.mpTotal), max: Number(data.mpTotal) }, Number(data.defenseTotal1Eva), Number(data.defenseTotal1Def), weapon);
-            areas.item(1).appendChild(pc.elem);
+async function load_clipboard() {
+    try {
+        // @ts-ignore
+        const permission = await navigator.permissions.query({ name: 'clipboard-read' });
+        console.log('Permission state:', permission.state);
+        const text = await navigator.clipboard.readText();
+        if (!text)
+            throw new Error('クリップボードが空です');
+        const data = JSON.parse(text);
+        console.log('Parsed data:', data);
+        const weapon_num = Number(data.weaponNum);
+        let weapon = [];
+        for (let i = 1; i <= weapon_num; ++i) {
+            weapon.push(new Weapon(data[`weapon${i}Name`] ?? '', Number(data[`weapon${i}AccTotal`] ?? 0), Number(data[`weapon${i}Rate`] ?? 0), Number(data[`weapon${i}Crit`] ?? 10), Number(data[`weapon${i}DmgTotal`] ?? 0)));
         }
-        catch (error) {
-            alert(`エラーが発生しました: ${error || '与えられたフォーマットが正しい形式ではありません'}`);
-        }
-    });
+        const pc = new PC(data.characterName, { now: Number(data.hpTotal), max: Number(data.hpTotal) }, { now: Number(data.mpTotal), max: Number(data.mpTotal) }, Number(data.defenseTotal1Eva), Number(data.defenseTotal1Def), weapon);
+        areas.item(1).appendChild(pc.elem);
+    }
+    catch (error) {
+        alert(`エラーが発生しました: ${error || '与えられたフォーマットが正しい形式ではありません'}`);
+    }
 }

@@ -22,7 +22,7 @@
 			<div class="button" onclick="add_unit()">追加</div>
 			<menu class="dice">
 				<input type="number" name="num" value="2" placeholder="ダイス数">
-				<div class="button" onclick="const v=this.previousElementSibling.value;const n=v!=null?Math.max(Number(v),1):2;const [d,t]=roll(n);push_log(`${n}d6 -> [${t}] -> ${d}`)">d6</div>
+				<div class="button" onclick="{const v=this.previousElementSibling.value;const n=v!=null?Math.max(Number(v),1):2;const [d,t]=roll(n);push_log(`${n}d6<span class=\'info\'> -> [${t}] -> </span>${d}`)}">d6</div>
 			</menu>
 			<hr>
 			<ol class="summary">
@@ -136,7 +136,7 @@
 	<dialog id="unit" data-type="pc">
 		<div class="header">
 			<input type="text" name="name" placeholder="名前">
-			<span class="button" onclick="const e=this.closest('dialog').dataset;switch(e.type){case'pc':e.type='npc';break;case'npc':e.type='pc';break;default:e.type='npc'}">PC&lt;-&gt;NPC</span>
+			<span class="button" onclick="{const e=this.closest('dialog').dataset;switch(e.type){case'pc':e.type='npc';break;case'npc':e.type='pc';break;default:e.type='npc'}}">PC&lt;-&gt;NPC</span>
 			<span class="button" onclick="selected_unit=null;this.closest('dialog').close()">複製</span>
 			<span class="delete button" onclick="delete_unit();this.closest('dialog').close()">削除</span>
 		</div>
