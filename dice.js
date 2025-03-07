@@ -1,4 +1,27 @@
 "use strict";
+function roll(dice = 2) {
+    if (dice < 1)
+        throw new Error('ダイスの個数が1個未満です');
+    let result = [];
+    for (let i = 0; i < dice; ++i)
+        result.push(Math.ceil(Math.random() * 6));
+    return [result.reduce((sum, v) => sum + v), `${result.join(',')}`];
+}
+function rate(rate, crit) {
+    let dmg = [];
+    let roll_log = [];
+    for (let i = 0; i < 100; ++i) {
+        const [dice, dice_text] = roll();
+        roll_log.push(dice_text);
+        if (dice === 2)
+            dmg.push('*');
+        else
+            dmg.push(rate_map[rate][dice - 3]);
+        if (dice < crit)
+            break;
+    }
+    return [dmg.filter(e => typeof e === 'number').reduce((sum, v) => sum + v, 0), dmg.join(','), roll_log.join(' '), dmg.length - 1];
+}
 const rate_map = [
     [0, 0, 0, 1, 2, 2, 3, 3, 4, 4], // 0
     [0, 0, 0, 1, 2, 3, 3, 3, 4, 4], // 1

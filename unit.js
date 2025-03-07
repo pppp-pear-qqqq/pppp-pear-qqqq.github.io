@@ -312,27 +312,6 @@ function battle(atker, target) {
         push_log(`攻撃 <span class="info">${atker.name}->${target.name}</span> <span class="highlight">回避</span> <span class="info">acc${acc}${acc_text} <= eva${eva}${eva_text}</span>`);
     }
 }
-function roll(dice = 2) {
-    if (dice < 1)
-        throw new Error('ダイスの個数が1個未満です');
-    let result = [];
-    for (let i = 0; i < dice; ++i)
-        result.push(Math.ceil(Math.random() * 6));
-    return [result.reduce((sum, v) => sum + v), `${result.join(',')}`];
-}
-function rate(rate, crit) {
-    let dmg = [];
-    let roll_log = [];
-    for (let i = 0; i < 100; ++i) {
-        const [dice, dice_text] = roll();
-        roll_log.push(dice_text);
-        if (dice !== 2)
-            dmg.push(rate_map[rate][dice - 3]);
-        if (dice < crit)
-            break;
-    }
-    return [dmg.reduce((sum, v) => sum + v, 0), dmg.join(','), roll_log.join(' '), dmg.length - 1];
-}
 function add_unit() {
     selected_unit = null;
     dialog.showModal();
