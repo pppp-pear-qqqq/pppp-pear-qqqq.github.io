@@ -68,6 +68,7 @@
 					<option>.json</option>
 				</select>
 			</menu>
+			<div class="danger" onclick="log.replaceChildren()">追加</div>
 			<menu>
 				<div class="button" onclick="document.body.dataset.theme='light'">光</div>
 				<div class="button" onclick="document.body.dataset.theme='dark'">闇</div>
@@ -138,21 +139,21 @@
 			<input type="text" name="name" placeholder="名前">
 			<span class="button" onclick="{const e=this.closest('dialog').dataset;switch(e.type){case'pc':e.type='npc';break;case'npc':e.type='pc';break;default:e.type='npc'}}">PC&lt;-&gt;NPC</span>
 			<span class="button" onclick="selected_unit=null;this.closest('dialog').close()">複製</span>
-			<span class="delete button" onclick="delete_unit();this.closest('dialog').close()">削除</span>
+			<span class="danger button" onclick="delete_unit();this.closest('dialog').close()">削除</span>
 		</div>
 		<table class="status">
 			<tbody>
 				<tr>
 					<th>HP</td>
-					<td><input type="number" name="hp-now"></td>
+					<td><input type="number" name="hp-now" onchange="link_value(this,1)"></td>
 					<td>/</td>
-					<td><input type="number" name="hp-max"></td>
+					<td><input type="number" name="hp-max" onchange="link_value(this,-1)"></td>
 				</tr>
 				<tr>
 					<th>MP</td>
-					<td><input type="number" name="mp-now"></td>
+					<td><input type="number" name="mp-now" onchange="link_value(this,1)"></td>
 					<td>/</td>
-					<td><input type="number" name="mp-max"></td>
+					<td><input type="number" name="mp-max" onchange="link_value(this,-1)"></td>
 				</tr>
 				<tr class="npc">
 					<th>命中力</th>

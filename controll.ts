@@ -10,6 +10,20 @@ function add_column(table: HTMLTableElement, class_name?: string, body_index?: n
 function remove_column(table: HTMLTableElement, body_index?: number) {
 	table.tBodies[body_index ?? 0].deleteRow(-1);
 }
+
+function link_value(self: HTMLInputElement, mode: 1 | 0 | -1) {
+	self.parentElement?.parentElement?.querySelectorAll('input').forEach(target => {
+		if (target != self) {
+			if (target.value == '' || mode === 0) {
+				target.valueAsNumber = self.valueAsNumber;
+			} else switch (mode) {
+				case 1: target.valueAsNumber = Math.max(target.valueAsNumber, self.valueAsNumber); break;
+				case -1: target.valueAsNumber = Math.min(target.valueAsNumber, self.valueAsNumber); break;
+			}
+		}
+	})
+}
+
 function push_log(text: string) {
 	const div = document.createElement('div');
 	div.innerHTML = text ?? '';

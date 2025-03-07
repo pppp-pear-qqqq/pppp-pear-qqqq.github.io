@@ -10,6 +10,24 @@ function add_column(table, class_name, body_index) {
 function remove_column(table, body_index) {
     table.tBodies[body_index ?? 0].deleteRow(-1);
 }
+function link_value(self, mode) {
+    self.parentElement?.parentElement?.querySelectorAll('input').forEach(target => {
+        if (target != self) {
+            if (target.value == '' || mode === 0) {
+                target.valueAsNumber = self.valueAsNumber;
+            }
+            else
+                switch (mode) {
+                    case 1:
+                        target.valueAsNumber = Math.max(target.valueAsNumber, self.valueAsNumber);
+                        break;
+                    case -1:
+                        target.valueAsNumber = Math.min(target.valueAsNumber, self.valueAsNumber);
+                        break;
+                }
+        }
+    });
+}
 function push_log(text) {
     const div = document.createElement('div');
     div.innerHTML = text ?? '';
