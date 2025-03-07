@@ -91,12 +91,13 @@ class PC {
                 set('rate');
                 set('crit');
                 set('dmg');
+                row.classList.toggle('select', e.classList.contains('select'));
                 table.insertRow().replaceWith(row);
             });
             dialog.showModal();
         }
         else {
-            unit_controll(ev.target);
+            unit_controll(ev.target, ev.shiftKey);
         }
     }
     dragstart(ev) {
@@ -186,7 +187,7 @@ class NPC {
             dialog.showModal();
         }
         else {
-            unit_controll(ev.target);
+            unit_controll(ev.target, ev.shiftKey);
         }
     }
     dragstart(ev) {
@@ -216,23 +217,26 @@ function npc_from_elem(elem) {
         max: Number(get('mp-max')),
     }, !is_dialog ? elem : undefined);
 }
-function unit_controll(target) {
-    var _a;
+function unit_controll(target, is_shift) {
+    var _a, _b;
     const e = target.closest('.hp,.mp,.weapons');
     if (e != null) {
         if (e.classList.contains('hp')) {
             const v = e.querySelector('.hp-now');
-            v.innerText = (Number(v.innerText) - 1).toString();
+            v.innerText = (Number(v.innerText) + (is_shift ? 1 : -1)).toString();
         }
         else if (e.classList.contains('mp')) {
             const v = e.querySelector('.mp-now');
-            v.innerText = (Number(v.innerText) - 1).toString();
+            v.innerText = (Number(v.innerText) + (is_shift ? 1 : -1)).toString();
         }
         else if (e.classList.contains('weapons') && e.children.length > 0) {
             const v = e.querySelector('&>.select');
             if (v != null) {
                 v.classList.remove('select');
-                ((_a = v.nextElementSibling) !== null && _a !== void 0 ? _a : e.firstElementChild).classList.add('select');
+                if (is_shift)
+                    ((_a = v.previousElementSibling) !== null && _a !== void 0 ? _a : e.lastElementChild).classList.add('select');
+                else
+                    ((_b = v.nextElementSibling) !== null && _b !== void 0 ? _b : e.firstElementChild).classList.add('select');
             }
             else {
                 e.firstElementChild.classList.add('select');

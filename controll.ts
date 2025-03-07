@@ -22,12 +22,12 @@ function log_click(ev: Event) {
 	const item = document.createElement('textarea');
 	item.addEventListener('focusout', log_focusout);
 	item.addEventListener('input', () => {
-		item.style.height = '0';
-		item.style.height = `${item.scrollHeight}px`;
+		item.style.removeProperty('min-height');
+		item.style.minHeight = `${item.scrollHeight}px`;
 	})
 	item.value = e.innerHTML.replace(/<br>/g, '\n');
 	e.replaceWith(item);
-	item.style.height = `${item.scrollHeight}px`;
+	item.style.minHeight = `${item.scrollHeight}px`;
 	item.focus();
 }
 function log_focusout(ev: Event) {
@@ -41,16 +41,46 @@ function log_focusout(ev: Event) {
 		e.remove();
 	}
 }
-function save_log() {
-	const text: string[] = [];
-	log.childNodes.forEach(e => {
-		text.push((e as HTMLElement).innerText);
-	});
-	const blob = new Blob([text.join('\n')], { type: 'text/plain' });
+function save_log(form: HTMLElement) {
+	const type = form.querySelector<HTMLSelectElement>('[name="type"]')!.value as '.txt' | '.html' | '.json';
+	const filename = form.querySelector<HTMLInputElement>('[name="name"]')!.value;
+	const blob = log_to_blob(type);
 	const a = document.createElement('a');
-	a.href = URL.createObjectURL(blob);
-	a.download = `sw25log_${Date.now()}.txt`;
+	a.href = URL.createObjectURL(blob!);
+	if (filename == '') {
+		a.download = `sw25log_${Date.now()}${type}`;
+	} else {
+		a.download = `${filename}${type}`;
+	}
 	a.click();
+}
+function log_to_clipboard(form: HTMLElement) {
+	const type = form.querySelector<HTMLSelectElement>('[name="type"]')!.value as '.txt' | '.html' | '.json';
+	const blob = log_to_blob(type);
+	blob.text().then(text => {
+		navigator.clipboard.writeText(text);
+	}).catch(err => {
+		console.error(err);
+	});
+}
+function log_to_blob(type: '.txt' | '.html' | '.json') {
+	switch (type) {
+		case '.txt': {
+			const text: string[] = [];
+			log.childNodes.forEach(e => {
+				text.push((e as HTMLElement).innerText);
+			});
+			return new Blob([text.join('\n')], { type: 'text/plain' });
+		}
+		case '.html': return new Blob([log.innerText], { type: 'text/html' });
+		case '.json': {
+			const text: string[] = [];
+			log.childNodes.forEach(e => {
+				text.push((e as HTMLElement).innerHTML);
+			});
+			return new Blob([JSON.stringify(text)], { type: 'text/plain' });
+		}
+	}
 }
 
 {

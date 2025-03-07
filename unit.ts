@@ -116,11 +116,12 @@ class PC implements Unit {
 				set('rate');
 				set('crit');
 				set('dmg');
+				row.classList.toggle('select', e.classList.contains('select'));
 				table.insertRow().replaceWith(row);
 			})
 			dialog.showModal();
 		} else {
-			unit_controll(ev.target as HTMLElement);
+			unit_controll(ev.target as HTMLElement, ev.shiftKey);
 		}
 	}
 	dragstart(ev: DragEvent) {
@@ -229,7 +230,7 @@ class NPC implements Unit {
 			set_npc('dmg');
 			dialog.showModal();
 		} else {
-			unit_controll(ev.target as HTMLElement);
+			unit_controll(ev.target as HTMLElement, ev.shiftKey);
 		}
 	}
 	dragstart(ev: DragEvent): void {
@@ -266,20 +267,21 @@ function npc_from_elem(elem: HTMLElement | HTMLDialogElement) {
 		!is_dialog ? elem : undefined,
 	)
 }
-function unit_controll(target: HTMLElement) {
+function unit_controll(target: HTMLElement, is_shift: boolean) {
 	const e = target.closest('.hp,.mp,.weapons');
 	if (e != null) {
 		if (e.classList.contains('hp')) {
 			const v = e.querySelector<HTMLElement>('.hp-now')!;
-			v.innerText = (Number(v.innerText) - 1).toString();
+			v.innerText = (Number(v.innerText) + (is_shift ? 1 : -1)).toString();
 		} else if (e.classList.contains('mp')) {
 			const v = e.querySelector<HTMLElement>('.mp-now')!;
-			v.innerText = (Number(v.innerText) - 1).toString();
+			v.innerText = (Number(v.innerText) + (is_shift ? 1 : -1)).toString();
 		} else if (e.classList.contains('weapons') && e.children.length > 0) {
 			const v = e.querySelector('&>.select');
 			if (v != null) {
 				v.classList.remove('select');
-				(v.nextElementSibling ?? e.firstElementChild!).classList.add('select');
+				if (is_shift) (v.previousElementSibling ?? e.lastElementChild!).classList.add('select');
+				else (v.nextElementSibling ?? e.firstElementChild!).classList.add('select');
 			} else {
 				e.firstElementChild!.classList.add('select');
 			}
