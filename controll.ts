@@ -94,9 +94,10 @@ function log_to_blob(type: '.txt' | '.html' | '.json') {
 						const [result, text] = roll(Number(num));
 						return `${match}<span class="info"> -> [${text}] -> </span>${result}`;
 					})
-					.replaceAll(/(^|\s+)k(\d+)(@(\d+))?/g, (match, _0, power: string, _1, crit: string) => {
-						const [result, text, powers, spin] = rate(Number(power), Number(crit));
-						let result_text = `${match}<span class="info"> -> [${text}]=${powers} -> </span>`;
+					.replaceAll(/(^|\s+)k(\d+)(@(\d+))?/g, (match, _0, power: string, _1, crit: string | undefined) => {
+						console.log(power, crit, crit != null ? /\d+/.test(crit) : false)
+						const [result, powers, dices, spin] = rate(Number(power), (crit != null ? /\d+/.test(crit) : false) ? Number(crit) : 10);
+						let result_text = `${match}<span class="info"> -> [${dices}]=${powers} -> </span>`;
 						if (spin > 0) result_text += `${result}<span class="info">(${spin}回転)</span>`;
 						else if (spin < 0) result_text += '自動失敗';
 						else result_text += result.toString();

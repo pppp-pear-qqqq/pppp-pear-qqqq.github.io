@@ -96,8 +96,9 @@ function log_to_blob(type) {
                     return `${match}<span class="info"> -> [${text}] -> </span>${result}`;
                 })
                     .replaceAll(/(^|\s+)k(\d+)(@(\d+))?/g, (match, _0, power, _1, crit) => {
-                    const [result, text, powers, spin] = rate(Number(power), Number(crit));
-                    let result_text = `${match}<span class="info"> -> [${text}]=${powers} -> </span>`;
+                    console.log(power, crit, crit != null ? /\d+/.test(crit) : false);
+                    const [result, powers, dices, spin] = rate(Number(power), (crit != null ? /\d+/.test(crit) : false) ? Number(crit) : 10);
+                    let result_text = `${match}<span class="info"> -> [${dices}]=${powers} -> </span>`;
                     if (spin > 0)
                         result_text += `${result}<span class="info">(${spin}回転)</span>`;
                     else if (spin < 0)
