@@ -104,18 +104,27 @@ function log_to_blob(type: '.txt' | '.html' | '.json') {
 			if (log.value != '') {
 				const text = log.value
 					.replace(/\r|\n|\r\n/g, '<br>')
-					.replaceAll(/(^|\s+)(\d+)d6/g, (match, _, num: string) => {
+					.replaceAll(/(^|\s+|\n|\r)(\d+)d6/g, (match, _, num: string) => {
 						const [result, text] = roll(Number(num));
-						return `${match}<span class="info"> -> [${text}] -> </span>${result}`;
+						return `${match}<span class="info"> -&gt; [${text}] -&gt; </span>${result}`;
 					})
-					.replaceAll(/(^|\s+)k(\d+)(@(\d+))?/g, (match, _0, power: string, _1, crit: string | undefined) => {
+					.replaceAll(/(^|\s+|\n|\r)k(\d+)(@(\d+))?/g, (match, _0, power: string, _1, crit: string | undefined) => {
 						console.log(power, crit, crit != null ? /\d+/.test(crit) : false)
 						const [result, powers, dices, spin] = rate(Number(power), (crit != null ? /\d+/.test(crit) : false) ? Number(crit) : 10);
-						let result_text = `${match}<span class="info"> -> [${dices}]=${powers} -> </span>`;
+						let result_text = `${match}<span class="info"> -&gt; [${dices}]=${powers} -&gt; </span>`;
 						if (spin > 0) result_text += `${result}<span class="info">(${spin}回転)</span>`;
 						else if (spin < 0) result_text += '自動失敗';
 						else result_text += result.toString();
 						return result_text;
+					})
+					.replaceAll(/(^|\s+|\n|\r)choice\s+(\d+)\s+(\d+)/g, (match, _, area: string, num: string) => {
+						let names = Array.prototype.map.call(areas.item(Number(area)).querySelectorAll('.unit'), (e: HTMLElement) => e.querySelector<HTMLElement>('.name')!.innerText) as string[];
+						let choose = [];
+						const n_num = Number(num);
+						for (let i = 0; i < n_num; ++i) {
+							choose.push(names[Math.floor(Math.random() * names.length)]);
+						}
+						return `${match}<span class="info"> -&gt; </span>${choose.join(',')}`;
 					})
 				push_log(text);
 				message.push('push-free-log');

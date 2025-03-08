@@ -22,7 +22,7 @@
 			<div class="button" onclick="add_unit()">追加</div>
 			<menu class="dice">
 				<input type="number" name="num" value="2" placeholder="ダイス数">
-				<div class="button" onclick="{const v=this.previousElementSibling.value;const n=v!=null?Math.max(Number(v),1):2;const [d,t]=roll(n);push_log(`${n}d6<span class=\'info\'> -> [${t}] -> </span>${d}`)}">d6</div>
+				<div class="button" onclick="{const v=this.previousElementSibling.value;const n=v!=null?Math.max(Number(v),1):2;const [d,t]=roll(n);push_log(`${n}d6<span class=\'info\'> -&gt; [${t}] -&gt; </span>${d}`)}">d6</div>
 			</menu>
 			<hr>
 			<ol class="summary">
