@@ -103,12 +103,11 @@ function log_to_blob(type: '.txt' | '.html' | '.json') {
 		if (ev.shiftKey && ev.key == 'Enter') {
 			if (log.value != '') {
 				const text = log.value
-					.replace(/\r|\n|\r\n/g, '<br>')
-					.replaceAll(/(^|\s+|\n|\r)(\d+)d6/g, (match, _, num: string) => {
+					.replaceAll(/(?:^|\n|\s)(\d+)d6/g, (match, num: string) => {
 						const [result, text] = roll(Number(num));
 						return `${match}<span class="info"> -&gt; [${text}] -&gt; </span>${result}`;
 					})
-					.replaceAll(/(^|\s+|\n|\r)k(\d+)(@(\d+))?/g, (match, _0, power: string, _1, crit: string | undefined) => {
+					.replaceAll(/(?:^|\n|\s)k(\d+)(?:@(\d+))?/g, (match, power: string, crit: string | undefined) => {
 						console.log(power, crit, crit != null ? /\d+/.test(crit) : false)
 						const [result, powers, dices, spin] = rate(Number(power), (crit != null ? /\d+/.test(crit) : false) ? Number(crit) : 10);
 						let result_text = `${match}<span class="info"> -&gt; [${dices}]=${powers} -&gt; </span>`;
@@ -117,7 +116,7 @@ function log_to_blob(type: '.txt' | '.html' | '.json') {
 						else result_text += result.toString();
 						return result_text;
 					})
-					.replaceAll(/(^|\s+|\n|\r)choice\s+(\d+)\s+(\d+)/g, (match, _, area: string, num: string) => {
+					.replaceAll(/(?:^|\n|\s)choice\s+(\d+)\s+(\d+)/g, (match, area: string, num: string) => {
 						let names = Array.prototype.map.call(areas.item(Number(area)).querySelectorAll('.unit'), (e: HTMLElement) => e.querySelector<HTMLElement>('.name')!.innerText) as string[];
 						let choose = [];
 						const n_num = Number(num);
@@ -126,6 +125,7 @@ function log_to_blob(type: '.txt' | '.html' | '.json') {
 						}
 						return `${match}<span class="info"> -&gt; </span>${choose.join(',')}`;
 					})
+					.replace(/\r|\n|\r\n/g, '<br>')
 				push_log(text);
 				message.push('push-free-log');
 			}
