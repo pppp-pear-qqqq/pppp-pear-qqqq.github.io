@@ -103,11 +103,11 @@ function log_to_blob(type: '.txt' | '.html' | '.json') {
 		if (ev.shiftKey && ev.key == 'Enter') {
 			if (log.value != '') {
 				const text = log.value
-					.replaceAll(/(?:^|\n|\s)(\d+)d6/g, (match, num: string) => {
+					.replaceAll(/(?:^|\s)(\d+)d6/g, (match, num: string) => {
 						const [result, text] = roll(Number(num));
 						return `${match}<span class="info"> -&gt; [${text}] -&gt; </span>${result}`;
 					})
-					.replaceAll(/(?:^|\n|\s)k(\d+)(?:@(\d+))?/g, (match, power: string, crit: string | undefined) => {
+					.replaceAll(/(?:^|\s)k(\d+)(?:@(\d+))?/g, (match, power: string, crit: string | undefined) => {
 						console.log(power, crit, crit != null ? /\d+/.test(crit) : false)
 						const [result, powers, dices, spin] = rate(Number(power), (crit != null ? /\d+/.test(crit) : false) ? Number(crit) : 10);
 						let result_text = `${match}<span class="info"> -&gt; [${dices}]=${powers} -&gt; </span>`;
@@ -116,7 +116,7 @@ function log_to_blob(type: '.txt' | '.html' | '.json') {
 						else result_text += result.toString();
 						return result_text;
 					})
-					.replaceAll(/(?:^|\n|\s)choice\s+(\d+)\s+(\d+)/g, (match, area: string, num: string) => {
+					.replaceAll(/(?:^|\s)choice\s+(\d+)\s+(\d+)/g, (match, area: string, num: string) => {
 						let names = Array.prototype.map.call(areas.item(Number(area)).querySelectorAll('.unit'), (e: HTMLElement) => e.querySelector<HTMLElement>('.name')!.innerText) as string[];
 						let choose = [];
 						const n_num = Number(num);
